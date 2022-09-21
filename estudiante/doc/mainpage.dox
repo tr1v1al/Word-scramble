@@ -1,0 +1,235 @@
+/*! \mainpage Cifras y letras
+
+@author Rodríguez Cao, Eduardo
+@author Ruiz Aguilar, Manuel
+@date Diciembre de 2021
+
+_____
+
+# Índice
+
+1. \ref Introducción
+
+2. \ref Encabezados
+
+   - \ref Lista
+
+   - \ref Uso
+
+3. \ref Eficiencia
+
+   - \ref wordHasLetters
+
+   - \ref getScore
+
+   - \ref wordsOfLength
+
+   - \ref Solver
+
+   - \ref getSolutions
+
+4. \ref Ejecutable
+
+   - \ref Partida_letras
+
+_____
+
+\section Introducción
+
+En este proyecto se han desarrollado herramientas que podrían ser útiles para el juego de "cifras y letras".
+Nos centraremos de momento en la prueba de las letras.
+
+Esta parte del juego consiste en formar la mejor palabra posible (dependiendo de uno de los dos
+criterios que explicamos a continuación) a partir de un conjunto de letras extraídas al azar de una
+bolsa. Por ejemplo, dadas las siguientes letras:
+
+O   D   Y   R   M   E   T
+
+Una buena solución posible sería METRO. El número de letras que se juegan en cada partida se
+decide de antemano, y las letras disponibles pueden repetirse. Existen dos modalidades de juego:
+
+  - Juego a longitud: En este modo de juego, se tiene en cuenta sólo la longitud de las
+palabras, y gana la palabra más larga encontrada.
+
+  - Juego a puntos: En este modo de juego, a cada letra se le asigna una puntuación, y la
+puntuación de la palabra será igual a la suma de las puntuaciones de las letras que la
+componen.
+
+En esta primera práctica, estudiaremos qué información necesitamos almacenar, y cuál es la forma más
+adecuada de almacenarla, para poder jugar una partida al juego de las letras.
+
+_____
+
+\section Encabezados
+
+\subsection Lista
+
+- letters_set.h
+
+- bag.h
+
+- letters_bag.h
+
+- dictionary.h
+
+- solver.h
+
+\subsection Uso
+
+● letters_set.h : Esta estructura de datos nos va a permitir almacenar la información de un conjunto de letras, del
+                  modo en el que las necesitaremos en una partida de las letras. En concreto, en una partida de letras,
+                  para cada letra disponible, necesitaremos saber:
+
+                  - El número total de repeticiones de la letra.
+
+                  - La puntuación que nos aporta cada letra al utilizarla en una palabra.
+
+● bag.h : Este TDA funciona como una bolsa de caracteres. Esto quiere decir que es
+          una colección que puede contener caracteres y nos permite extraerlos aleatoriamente y sin
+          reemplazamiento.
+
+          Ahora, podemos pensar en que este contenedor no tendría por qué tener elementos de tipo char
+          necesariamente. Podría contener números, palabras completas, structs de cualquier
+          tipo, objetos de cualquier clase que hubiéramos implementado…
+
+● letters_bag.h: Es una bolsa de caracteres a partir de bag.h, que además puede interpretar la información de un objeto
+                 de la clase letters_set.h, y crear una bolsa asociada que tenga tantas letras como en el LettersSet,
+                 y con las repeticiones adecuadas. Además, una vez construida la bolsa de letras, podemos extraer
+                 letras aleatorias de la misma.
+
+                 La forma de determinar las letras que tendremos disponibles para una
+                 partida de las letras será construir una bolsa como esta y extraer aleatoriamente un número de
+                 letras determinado de ella.
+
+● dictionary.h: Contenedor de los términos aceptados de la partida, una estructura que nos permite
+                almacenar strings, sin necesidad de almacenar información más compleja. Además, el conjunto tiene dos
+                propiedades específicas:
+
+                - Los elementos están ordenados por orden alfabético. Tiene mucho sentido que, en
+                un diccionario, los elementos se ordenen de esta manera, y no en otro orden,
+                independientemente del orden en que se hayan insertado.
+
+                - Los elementos no se deben repetir. Estamos manteniendo una lista de palabras de un
+                idioma, no nos interesa tener palabras repetidas, sino saber simplemente qué palabras
+                pertenecen al mismo.
+
+● solver.h:     Clase para resolver una partida de Cifras y letras.
+
+Se consigue un vector de palabras enlazadas con su puntuación las palabras de un TDA Dictionary; las
+palabras aceptadas en la partida; que se puedan formar como combinación de un subconjunto de las letras
+de un TDA LettersSet; información de letras aceptadas (repeticiones y puntuación); cuyas puntuaciones
+vendrán dadas por la longitud máxima o la máxima suma de puntuación de cada letra para cada palabra,
+según se elija (la puntuación devuelta en cada palabra debe tener el mismo valor, ya que se devuelve
+más de un elemento en el vector si existen palabras que comparten la puntuación máxima).
+
+_____
+
+\section Eficiencia
+
+Eficiencia de los métodos de solver.h y los métodos de otras TDAs utilizadas en solver.h:
+
+(suponemos métodos de vector y string usados O(1) )
+
+\subsection wordHasLetters
+
+ ( de solver.h)
+
+ Es O(n²), donde n es el número de letras en letters. El interior del bucle while interior es O(1),
+ de tal forma que el propio while interior es O(n) y en el peor caso, donde word tiene todas las letras o más y es de
+ longitud n o más, el while interior reduce las iteraciones en una en cada iteración del while exterior y para cuando
+ el vector auxiliar (copia de las letras introducidas) queda vacío o se comprueba que todas las letras están en word,
+ las iteraciones terminan (Sum de i=0 a n de n-i) = (Sum de i=0 a n de i) = n+n-1+n-2+...+n-(n-1)+n-n =
+ (n+1)*n - (Sum de i=0 a n de i) despejando queda:
+
+(n+1)*n/2 = (Sum de i=0 a n de i) = (Sum de i=0 a n de n-i) --> O(n²)
+
+\subsection getScore
+
+( de letters_set.h )
+
+Recorre todo el string, y suma la puntuación de cada letra para obtener el resultado de una palabra por
+puntuación. Llamando n al tamaño del string introducido, como el cuerpo del bucle es O(1), getScore es O(n).
+
+\subsection wordsOfLength
+
+( de dictionary.h )
+
+Recorre todo el diccionario, y añade al vector resultante cada palabra de longitud igual a la introducida.
+Llamando r al tamaño del diccionario que llama al método, como el cuerpo del bucle es O(1) ya que es una condición
+donde llama a length de un string y en caso afirmativo añadir al final del vector resultante una palabra,
+wordsOfLength es O(r).
+
+\subsection Solver
+
+Constructor por parámetros de la clase Solver. Solo inicializa _dict y _ls con los parámetros, O(1).
+
+\subsection getSolutions
+
+ ( de solver.h)
+
+·En caso de elegir jugar por puntuación, recorremos toda el diccionario _dict y dentro del bucle a cada palabra le
+aplicamos \ref wordHasLetters como condición. En caso afirmativo, se usa \ref getScore para calcular la suma de la
+puntuación de sus letras, que se compara con la máxima puntuación registrada y si es igual se añade al vector, si es
+mayor se reinicia el vector con él.
+
+Llamando r al tamaño de _dict, n el número de letras del vector parámetro available_letters y suponiendo como peor caso
+que los strings tienen como longitud n, y además siendo cada palabra en _dict menor en puntuación que la siguiente:
+
+r*(n²+n)--> O(rn²) que al ser fijo el diccionario interno, O(n²).
+
+·En caso de elegir jugar por longitud, probamos con buscar las palabras en _dict de longitud menor o igual al tamaño
+de available_letters, y usando wordsOfLength conseguimos un vector palabras de dicha longitud. Luego con wordHasLetters
+hacemos que cada palabra del vector de única longitud que contenga las letras introducidas se añada a otro vector, que
+justo después se mira si está vacío, y si está vacío probamos con una longitud menor.
+
+Llamando r al tamaño de _dict, n el número de letras del vector parámetro available_letters.
+
+El peor caso es encontrar una palabra de longitud 1, ya que entonces miraremos en todas las longitudes hasta llegar a
+uno, y se aplica wordsOfLength n veces, y al final wordHasLetters se aplica a todas las palabras de _dict con longitud
+menor o igual a n, donde si todas las palabras de _dict entran en ese criterio, es aún peor.
+
+n*r + r*n²--> O(rn²) que al ser fijo el diccionario interno, O(n²).
+
+_____
+
+\section Ejecutable
+
+\subsection Partida_letras
+
+Ejecutable para probar la implementación de solver.h: partida_letras.cpp
+
+Recibe como argumentos:
+
+1. Ruta al archivo que contiene las letras y su puntuación
+2. Ruta al archivo que contiene el diccionario
+3. Modo de juego (L = longitud, P = puntuación)
+4. Cantidad de letras para la partida
+
+Construye el LettersSet para la partida a partir del archivo de letras,
+el Dictionary con las palabras que se consideran soluciones correctas, el solver que va a jugar la
+partida y la LettersBag que se utiliza para extraer las letras.
+
+Una vez construidos los TDAs necesarios, se extraen las letras con las que se juegan la partida, utiliza el solver
+para buscar las soluciones, e imprime por pantalla tanto las letras para la partida como las mejores soluciones que
+se pueden obtener con dichas letras y la puntuación de dichas soluciones.
+
+A modo de ejemplo, la salida del programa DEBE ser la siguiente:
+
+> ./build/partida_letras data/letras.txt data/diccionario.txt L 9
+
+LETRAS DISPONIBLES:
+
+D S N T D A I E N
+
+SOLUCIONES:
+
+dentina
+
+entidad
+
+sentina
+
+PUNTUACION:
+
+7
+*/
